@@ -1,14 +1,19 @@
+'''Code gets minimal price for iphones, found at 'heureka.cz' and checks, if this price is significantly lower that other shops proposition'''
+'''So, if the lowest price is unique and significantly lower(which is defined by coeff parameter in price_abomination_check function) it returns True, False otherwise)'''
+'''Product name, minimal price, link to the shop with minimal price are stored in csv file'''
+'''Code runs each hour, after each run notification is displayed'''
+
 # Importing necessary libraries
-from requests_html import HTMLSession
-from itertools import count
-import csv
-import os
-from datetime import datetime
-from plyer import notification
-import time
 # Defining a function to clean the prices of the products
 
 
+
+
+from requests_html import HTMLSession
+from itertools import count
+import csv, os, time
+from datetime import datetime
+from plyer import notification
 def price_clean(price):
     return int(''.join(i for i in price if i.isdigit()))
 # Defining a function to check if the prices of a product are abnormally high
@@ -76,6 +81,8 @@ while True:
         csv_read = csv.DictReader(file)
         abom_num = len(tuple(filter(lambda x: x == 'False',
                        (i['Price_abomination'] for i in csv_read))))  # check amount of big discounts
-    notification.notify(title='Check finished',
-                        message=f"Your csv file is stored in: {os.path.abspath(f'{breadcrumbs[-1]}({cur_time}).csv')}. There were {abom_num} huge discounts found")
-    time.sleep(3600)
+    notification.notify(title=f'{abom_num} big discounts were found',
+                        message=f"Csv file's path: {os.path.abspath(f'{breadcrumbs[-1]}({cur_time}).csv')}",
+                        # adding urgency for notification do not dissapear automatically on Linux
+                        hints={'urgency': 2})
+    time.sleep(3600)  # making app to work hourly
