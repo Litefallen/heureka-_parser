@@ -7,21 +7,30 @@ from datetime import datetime
 from plyer import notification
 import time
 # Defining a function to clean the prices of the products
+
+
 def price_clean(price):
     return int(''.join(i for i in price if i.isdigit()))
 # Defining a function to check if the prices of a product are abnormally high
+
+
 def price_abomination_check(prices, coeff):
     return True if sorted(prices)[0] < sorted(prices)[1] * coeff else False
-session = HTMLSession() # Creating an HTML session object to send requests to the website
-smartphones = [] # Creating an empty list to store the data and a dictionary to store the details of each product
-dicti = {} 
-c_p = count(1) # Creating a counter to iterate over the website pages
-url = 'https://mobilni-telefony.heureka.cz/f:1651:387362;1666:101069/?f=1' # Defining the URL to scrape
- # Sending a GET request to the URL and rendering the page using JavaScript
+
+
+# Creating an HTML session object to send requests to the website
+session = HTMLSession()
+smartphones = []  # Creating an empty list to store the data and a dictionary to store the details of each product
+dicti = {}
+c_p = count(1)  # Creating a counter to iterate over the website pages
+# Defining the URL to scrape
+url = 'https://mobilni-telefony.heureka.cz/f:1651:387362;1666:101069/?f=1'
+# Sending a GET request to the URL and rendering the page using JavaScript
 s = session.get(url)
 s.html.render(sleep=1)
 # Extracting the breadcrumbs from the page
-breadcrumbs = [crumbs.text.replace(' ', '_') for crumbs in s.html.find('.c-breadcrumbs__list li')]
+breadcrumbs = [crumbs.text.replace(' ', '_')
+               for crumbs in s.html.find('.c-breadcrumbs__list li')]
 while True:
     # Iterating over the pages of the website and appending the links of the products to the list
     while True:
@@ -33,7 +42,8 @@ while True:
         print('Scrapping products from the next page..')
 
     # Extracting the links of the products from the list
-    links = (i.attrs['href'] for i in smartphones if 'exit' not in i.attrs['href'])
+    links = (i.attrs['href']
+             for i in smartphones if 'exit' not in i.attrs['href'])
 
     print('Getting product data..')
 
@@ -53,7 +63,7 @@ while True:
     cur_time = datetime.now().strftime('%d%m%y_%H%M%S')
 
     # Exporting the product details to a CSV file
-    with open(f'{breadcrumbs[-1]}({cur_time}).csv', 'w') as file:
+    with open(f'{breadcrumbs[-1]}({cur_time}).csv', 'w+') as file:
         print('Exporting date to csv file..')
         wrtr = csv.DictWriter(
             file, fieldnames=['Name', 'Min_price', 'Link', 'Price_abomination'])
@@ -63,6 +73,9 @@ while True:
                 dicti[i])], 'Price_abomination': price_abomination_check(dicti[i], .6)})  # check if abnormally low price exists
         print(
             f"Your csv file is stored in: {os.path.abspath(f'{breadcrumbs[-1]}({cur_time}).csv')}")
-    notification.notify(title='Check finished',message = 'A hourly discount checking has been completed')
+        csv_read = csv.DictReader(file)
+        abom_num = len(tuple(filter(lambda x: x == 'False',
+                       (i['Price_abomination'] for i in csv_read))))  # check amount of big discounts
+    notification.notify(title='Check finished',
+                        message=f"Your csv file is stored in: {os.path.abspath(f'{breadcrumbs[-1]}({cur_time}).csv')}. There were {abom_num} huge discounts found")
     time.sleep(3600)
-    
