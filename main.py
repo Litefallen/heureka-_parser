@@ -32,7 +32,7 @@ c_p = count(1)  # Creating a counter to iterate over the website pages
 url = 'https://mobilni-telefony.heureka.cz/f:1651:387362;1666:101069/?f=1'
 # Sending a GET request to the URL and rendering the page using JavaScript
 s = session.get(url)
-s.html.render(sleep=1)
+# s.html.render(sleep=1)
 # Extracting the breadcrumbs from the page
 breadcrumbs = [crumbs.text.replace(' ', '_')
                for crumbs in s.html.find('.c-breadcrumbs__list li')]
