@@ -5,20 +5,18 @@
 
 # Importing necessary libraries
 # Defining a function to clean the prices of the products
-
-
-
-
 from requests_html import HTMLSession
 from itertools import count
 import csv, os, time
 from datetime import datetime
 from plyer import notification
+
+
 def price_clean(price):
     return int(''.join(i for i in price if i.isdigit()))
+
+
 # Defining a function to check if the prices of a product are abnormally high
-
-
 def price_abomination_check(prices, coeff):
     return True if sorted(prices)[0] < sorted(prices)[1] * coeff else False
 
@@ -49,9 +47,7 @@ while True:
     # Extracting the links of the products from the list
     links = (i.attrs['href']
              for i in smartphones if 'exit' not in i.attrs['href'])
-
     print('Getting product data..')
-
     # Iterating over the links of the products and extracting their details
     for i in links:
         s = session.get(i)
@@ -75,12 +71,13 @@ while True:
         wrtr.writeheader()
         for i in dicti:
             wrtr.writerow({'Name': i, 'Min_price': min(dicti[i]), 'Link': dicti[i][min(
-                dicti[i])], 'Price_abomination': price_abomination_check(dicti[i], .6)})  # check if abnormally low price exists
+                dicti[i])], 'Price_abomination': price_abomination_check(dicti[i],
+                                                                         .6)})  # check if abnormally low price exists
         print(
             f"Your csv file is stored in: {os.path.abspath(f'{breadcrumbs[-1]}({cur_time}).csv')}")
         csv_read = csv.DictReader(file)
         abom_num = len(tuple(filter(lambda x: x == 'False',
-                       (i['Price_abomination'] for i in csv_read))))  # check amount of big discounts
+                                    (i['Price_abomination'] for i in csv_read))))  # check amount of big discounts
     notification.notify(title=f'{abom_num} big discounts were found',
                         message=f"Csv file's path: {os.path.abspath(f'{breadcrumbs[-1]}({cur_time}).csv')}",
                         # adding urgency for notification do not dissapear automatically on Linux
